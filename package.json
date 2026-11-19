@@ -1,0 +1,14 @@
+{
+  "name": "joborbit",
+  "version": "1.0.0",
+  "private": true,
+  "description": "JobOrbit - Job Portal & Application Tracker",
+  "scripts": {
+    "client": "npm run dev --prefix client",
+    "server": "npm run start --prefix server",
+    "test": "npm run test --prefix server",
+    "build": "npm run build --prefix client",
+    "client:build": "npm run build --prefix client",
+    "server:start": "npm run start --prefix server"
+  }
+}

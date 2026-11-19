@@ -1,0 +1,7 @@
+/* Base layout styles for JobOrbit */
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
