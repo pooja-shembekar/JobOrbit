@@ -9,15 +9,38 @@ import assistantRoutes from './routes/assistantRoutes.js';
 import { notFoundHandler, errorHandler } from './middleware/errorHandler.js';
 
 const app = express();
-const allowedOrigins = (process.env.CLIENT_URL || 'http://localhost:5173')
-  .split(',')
-  .map((origin) => origin.trim())
-  .filter(Boolean);
+const configuredClientUrls = process.env.CLIENT_URL || 'https://job-orbit-fawn.vercel.app';
+const configuredClientOrigins = configuredClientUrls.split(',').map((value) => {
+  let url;
+  try {
+    url = new URL(value.trim());
+  } catch {
+    throw new Error('CLIENT_URL must contain valid HTTP(S) frontend origins.');
+  }
 
-app.use(cors({
-  origin: (origin, callback) => callback(null, !origin || allowedOrigins.includes(origin)),
+  if (!['http:', 'https:'].includes(url.protocol)
+    || !url.hostname
+    || url.username
+    || url.password
+    || url.pathname !== '/'
+    || url.search
+    || url.hash) {
+    throw new Error('CLIENT_URL must contain valid HTTP(S) frontend origins.');
+  }
+
+  return url.origin;
+});
+const allowedOrigins = new Set([
+  ...configuredClientOrigins,
+  'https://job-orbit-fawn.vercel.app',
+  'http://localhost:5173',
+]);
+const corsOptions = {
+  origin: (origin, callback) => callback(null, !origin || allowedOrigins.has(origin)),
   credentials: true,
-}));
+};
+
+app.use(cors(corsOptions));
 app.use(express.json({ limit: '1mb' }));
 
 const getDbStatusString = (state) => {

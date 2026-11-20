@@ -16,7 +16,7 @@ This checklist targets **Render** for the Node API, **Vercel** for the Vite fron
 - Start command: `npm start`.
 - Add `PORT` (Render normally provides it), `NODE_ENV=production`, `MONGO_URI`, `JWT_SECRET`, `JWT_EXPIRES_IN`, `CLIENT_URL`, `RESEND_API_KEY`, and `EMAIL_FROM`.
 - Generate a high-entropy JWT secret and store it only in Render's secret settings.
-- Set `CLIENT_URL` to the exact Vercel origin. Multiple allowed origins may be comma-separated.
+- Set `CLIENT_URL` to `https://job-orbit-fawn.vercel.app` (the exact Vercel origin, without a trailing slash). The API also allows `http://localhost:5173` for local development. Multiple configured frontend origins may be comma-separated.
 - Configure the selected S3 variables if resume uploads are enabled; keep the bucket private and grant only the API's required object permissions.
 - Configure `RESEND_API_KEY` and `EMAIL_FROM` after verifying the sender domain. These credentials are used only for application notifications; registration does not send email.
 - Application submission, status changes, and new or changed interview schedules can send candidate/recruiter notifications. Repeating an unchanged status or interview schedule does not send another notification. Verify delivery with a controlled candidate/recruiter account after configuring Resend; tests use a mocked provider response.

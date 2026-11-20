@@ -83,6 +83,57 @@ const submitApplication = (token, jobId, body = {}) => request(app)
   .set('Authorization', `Bearer ${token}`)
   .send({ ...validApplicationData, ...body });
 
+describe('CORS', () => {
+  it('allows the production frontend origin', async () => {
+    const response = await request(app)
+      .get('/api/health')
+      .set('Origin', 'https://job-orbit-fawn.vercel.app');
+
+    assert.equal(response.headers['access-control-allow-origin'], 'https://job-orbit-fawn.vercel.app');
+    assert.equal(response.headers['access-control-allow-credentials'], 'true');
+  });
+
+  it('allows the localhost development origin', async () => {
+    const response = await request(app)
+      .get('/api/health')
+      .set('Origin', 'http://localhost:5173');
+
+    assert.equal(response.headers['access-control-allow-origin'], 'http://localhost:5173');
+    assert.equal(response.headers['access-control-allow-credentials'], 'true');
+  });
+
+  it('does not allow an unknown origin', async () => {
+    const response = await request(app)
+      .get('/api/health')
+      .set('Origin', 'https://untrusted.example');
+
+    assert.equal(response.headers['access-control-allow-origin'], undefined);
+  });
+
+  it('handles OPTIONS preflight requests for API routes', async () => {
+    const response = await request(app)
+      .options('/api/jobs')
+      .set('Origin', 'https://job-orbit-fawn.vercel.app')
+      .set('Access-Control-Request-Method', 'POST')
+      .set('Access-Control-Request-Headers', 'authorization,content-type');
+
+    assert.equal(response.status, 204);
+    assert.equal(response.headers['access-control-allow-origin'], 'https://job-orbit-fawn.vercel.app');
+    assert.match(response.headers['access-control-allow-methods'], /POST/);
+    assert.match(response.headers['access-control-allow-headers'], /authorization/i);
+    assert.equal(response.headers['access-control-allow-credentials'], 'true');
+  });
+
+  it('includes CORS headers on API error responses', async () => {
+    const response = await request(app)
+      .get('/api/nonexistent')
+      .set('Origin', 'https://job-orbit-fawn.vercel.app');
+
+    assert.equal(response.status, 404);
+    assert.equal(response.headers['access-control-allow-origin'], 'https://job-orbit-fawn.vercel.app');
+  });
+});
+
 describe('authentication and authorization', () => {
   it('returns JSON for registration validation and malformed JSON errors', async () => {
     const missingFields = await request(app).post('/api/auth/register').send({ email: 'missing@example.test' });
